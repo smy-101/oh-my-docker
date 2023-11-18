@@ -9,19 +9,20 @@ ENV SHELL /bin/bash
 ADD mirrorlist /etc/pacman.d/mirrorlist
 
 # 更新系统并安装常用工具和rbenv-build所需package
-RUN yes | pacman -Syu
-RUN yes | pacman -S curl git zsh nodejs-lts-hydrogen base-devel libffi libyaml openssl zlib && \
+RUN yes | pacman -Syu && \
+    yes | pacman -S curl git zsh nodejs-lts-hydrogen base-devel libffi libyaml openssl zlib go && \
     rm -rf /var/cache/pacman/pkg/*
 
-# 安装rust
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-
-# 设置rust环境变量
-ENV PATH="$HOME/.cargo/bin:$PATH"
+# 设置 npm 镜像源
+RUN npm config set registry https://registry.npmmirror.com
 
 # 设置代理
-ENV http_proxy=http://192.168.18.20:7890
-ENV https_proxy=http://192.168.18.20:7890
+ENV http_proxy=http://192.168.18.226:7890
+ENV https_proxy=http://192.168.18.226:7890
+
+# 配置prezto
+RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
+RUN zsh -c 'setopt EXTENDED_GLOB; for rcfile in "${ZDOTDIR:-$HOME}"/.zprezto/runcoms/^README.md(.N); do ln -s "$rcfile" "${ZDOTDIR:-$HOME}/.${rcfile:t}"; done'
 
 # 安装 rbenv
 RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv
@@ -29,17 +30,29 @@ ENV PATH="/root/.rbenv/bin:$PATH"
 RUN echo 'eval "$(rbenv init -)"' >> ~/.bashrc && \
     echo 'eval "$(rbenv init -)"' >> ~/.zshrc
 
+# Ruby相关
 # 安装 ruby-build
 RUN git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
 
-# 安装 Ruby，并设置默认版本
+# 安装 Ruby,并设置默认版本
 ARG ruby_version=3.2.0
 RUN rbenv install $ruby_version
 RUN rbenv global $ruby_version
 
-# 配置prezto
-RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
-RUN zsh -c 'setopt EXTENDED_GLOB; for rcfile in "${ZDOTDIR:-$HOME}"/.zprezto/runcoms/^README.md(.N); do ln -s "$rcfile" "${ZDOTDIR:-$HOME}/.${rcfile:t}"; done'
+# 设置 gem 源
+RUN /bin/bash -l -c "gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/"
+
+# 安装 bundler 并设置源
+RUN /bin/bash -l -c "gem install bundler && bundle config mirror.https://rubygems.org https://gems.ruby-china.com"
+
+# 安装rust
+# RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+# 设置rust环境变量
+# ENV PATH="$HOME/.cargo/bin:$PATH"
+
+# 设置工作目录
+WORKDIR /home/workspace
 
 # 设置使用zsh进行终端交互
 CMD [ "zsh" ]

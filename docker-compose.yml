@@ -1,0 +1,26 @@
+version: '1'
+services:
+  web:
+    build: .
+    image: oh-my-docker
+    command: sleep infinity
+    volumes:
+      - workspace:/home/workspace
+      - vscode-extensions:/root/.vscode-server/extensions
+      - ssh:/root/.ssh
+      - rbenv:/root/.rbenv
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8082:8082"
+      - "8003:8003"
+      - "3000:3000"
+    networks:
+      - docker-network
+volumes:
+  workspace:
+  vscode-extensions:
+  ssh:
+  rbenv:
+networks:
+  docker-network:
