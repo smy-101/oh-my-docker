@@ -1,0 +1,13 @@
+{
+  "name": "on-my-env",
+  "dockerComposeFile": "./docker-compose.yml",
+  "service": "web",
+  "workspaceFolder": "/home/workspace",
+  "extensions": [
+    "vscodevim.vim",
+    "shopify.ruby-lsp"
+  ],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/zsh"
+  }
+}

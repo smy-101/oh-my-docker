@@ -2,7 +2,7 @@ version: '1'
 services:
   web:
     build: .
-    image: oh-my-docker
+    # image: oh-my-docker
     command: sleep infinity
     volumes:
       - workspace:/home/workspace

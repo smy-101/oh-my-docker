@@ -8,13 +8,11 @@ ENV SHELL /bin/bash
 # arch换源
 ADD mirrorlist /etc/pacman.d/mirrorlist
 
-# 更新系统并安装常用工具和rbenv-build所需package
+# 更新系统并安装常用工具和rbenv-build所需package,设置npm镜像源
 RUN yes | pacman -Syu && \
-    yes | pacman -S curl git zsh nodejs-lts-hydrogen base-devel libffi libyaml openssl zlib go && \
+    yes | pacman -S curl git zsh nodejs-lts-hydrogen npm base-devel libffi libyaml openssl zlib go && \
+    npm config set registry https://registry.npmmirror.com && \
     rm -rf /var/cache/pacman/pkg/*
-
-# 设置 npm 镜像源
-RUN npm config set registry https://registry.npmmirror.com
 
 # 设置代理
 ENV http_proxy=http://192.168.18.226:7890
@@ -39,12 +37,6 @@ ARG ruby_version=3.2.0
 RUN rbenv install $ruby_version
 RUN rbenv global $ruby_version
 
-# 设置 gem 源
-RUN /bin/bash -l -c "gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/"
-
-# 安装 bundler 并设置源
-RUN /bin/bash -l -c "gem install bundler && bundle config mirror.https://rubygems.org https://gems.ruby-china.com"
-
 # 安装rust
 # RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
@@ -55,5 +47,5 @@ RUN /bin/bash -l -c "gem install bundler && bundle config mirror.https://rubygem
 WORKDIR /home/workspace
 
 # 设置使用zsh进行终端交互
-CMD [ "zsh" ]
-RUN chsh -s $(which zsh) root
+# CMD [ "zsh" ]
+# RUN chsh -s $(which zsh) root
